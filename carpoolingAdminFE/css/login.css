@@ -1,0 +1,28 @@
+body {
+    background: linear-gradient(to right, #4a90e2, #9013fe); /* Gradient từ xanh dương sang tím */
+    height: 100vh; /* Chiều cao toàn bộ viewport */
+    margin: 0; /* Xóa khoảng cách mặc định */
+    display: flex; /* Sử dụng flexbox để căn giữa */
+    justify-content: center; /* Căn giữa theo chiều ngang */
+    align-items: center; /* Căn giữa theo chiều dọc */
+}
+
+.container {
+    max-width: 1200px; /* Giới hạn chiều rộng của container */
+    width: 100%; /* Đảm bảo container chiếm toàn bộ chiều rộng */
+}
+
+.login-container {
+    background-color: rgba(255, 255, 255, 0.9); /* Màu nền trắng với độ trong suốt */
+    border-radius: 10px; /* Bo tròn các góc */
+    padding: 20px; /* Thêm khoảng cách bên trong */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Đổ bóng cho container */
+}
+
+.btn-login {
+    transition: background-color 0.3s ease; /* Hiệu ứng chuyển màu cho nút */
+}
+
+.btn-login:hover {
+    background-color: #0056b3; /* Màu nền khi hover */
+}

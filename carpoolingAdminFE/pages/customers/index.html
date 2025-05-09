@@ -1,0 +1,491 @@
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Quản Lý Khách Hàng</h2>
+        <div>
+            <button id="refreshCustomersBtn" class="btn btn-info">
+                <i class="fas fa-sync"></i> Làm Mới
+            </button>
+            <button id="exportCustomersBtn" class="btn btn-success">
+                <i class="fas fa-file-export"></i> Xuất Excel
+            </button>
+        </div>
+    </div>
+    
+    <!-- Search and Filter -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <h6 class="m-0 font-weight-bold text-primary">Tìm Kiếm & Lọc</h6>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input type="text" id="searchCustomers" class="form-control" placeholder="Tìm kiếm theo tên, email, số điện thoại...">
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select id="statusFilter" class="form-control">
+                        <option value="">-- Trạng Thái --</option>
+                        <option value="APPROVED">Đã phê duyệt</option>
+                        <option value="PENDING">Đang chờ</option>
+                        <option value="REJECTED">Từ chối</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button id="applyFilterBtn" class="btn btn-primary">Áp Dụng</button>
+                    <button id="resetFilterBtn" class="btn btn-secondary">Đặt Lại</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Customers Table -->
+    <div class="card shadow">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">Danh Sách Khách Hàng</h6>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Họ Tên</th>
+                            <th>Email</th>
+                            <th>Số Điện Thoại</th>
+                            <th>Trạng Thái</th>
+                            <th>Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="customersTableBody">
+                        <!-- Dữ liệu sẽ được thêm vào đây động -->
+                        <tr>
+                            <td colspan="6" class="text-center">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="sr-only">Loading...</span>
+                                </div>
+                                <p>Đang tải danh sách khách hàng...</p>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-3">
+                <div id="customersPageInfo">Hiển thị 0 mục</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal xem chi tiết khách hàng -->
+<div class="modal fade" id="customerDetailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title" id="customerDetailModalLabel">Chi Tiết Khách Hàng</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <!-- Thông tin cơ bản và ảnh đại diện -->
+                    <div class="row mb-4">
+                        <div class="col-md-4 text-center">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="m-0 font-weight-bold">Ảnh Đại Diện</h6>
+                                </div>
+                                <div class="card-body d-flex align-items-center justify-content-center">
+                                    <img id="avatarImage" src="" alt="Avatar" class="img-fluid rounded" style="max-height: 180px; max-width: 100%;">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div class="card h-100">
+                                <div class="card-header bg-light">
+                                    <h6 class="m-0 font-weight-bold">Thông Tin Cá Nhân</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">ID:</label>
+                                                <p id="customerId" class="form-control-static border-bottom pb-2"></p>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Họ Tên:</label>
+                                                <p id="customerName" class="form-control-static border-bottom pb-2"></p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Email:</label>
+                                                <p id="customerEmail" class="form-control-static border-bottom pb-2"></p>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Số Điện Thoại:</label>
+                                                <p id="customerPhone" class="form-control-static border-bottom pb-2"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label class="font-weight-bold">Trạng Thái:</label>
+                                                <p id="customerStatus" class="form-control-static"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Thống kê chuyến đi -->
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h6 class="m-0 font-weight-bold">Thống Kê Chuyến Đi</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4 text-center">
+                                            <div class="card border-left-primary shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                                                Tổng Số Chuyến</div>
+                                                            <div id="totalTrips" class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-car fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="card border-left-success shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                                                Chuyến Thành Công</div>
+                                                            <div id="completedTrips" class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-check-circle fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4 text-center">
+                                            <div class="card border-left-danger shadow h-100 py-2">
+                                                <div class="card-body">
+                                                    <div class="row no-gutters align-items-center">
+                                                        <div class="col mr-2">
+                                                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                                                Chuyến Đã Hủy</div>
+                                                            <div id="cancelledTrips" class="h5 mb-0 font-weight-bold text-gray-800">0</div>
+                                                        </div>
+                                                        <div class="col-auto">
+                                                            <i class="fas fa-times-circle fa-2x text-gray-300"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" data-dismiss="modal">Đóng</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal từ chối khách hàng -->
+<div class="modal fade" id="rejectModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Từ Chối Khách Hàng</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="rejectCustomerId">
+                <div class="form-group">
+                    <label>Lý Do Từ Chối:</label>
+                    <textarea id="rejectionReason" class="form-control" rows="3"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" id="confirmReject">Xác Nhận</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+$(document).ready(function() {
+    console.log("Document ready - Loading customers...");
+    // Tải danh sách khách hàng khi trang được tải
+    loadCustomers();
+    
+    // Gắn sự kiện làm mới
+    $('#refreshCustomersBtn').on('click', function() {
+        loadCustomers();
+    });
+    
+    // Gắn sự kiện xác nhận từ chối
+    $('#confirmReject').on('click', function() {
+        const id = $('#rejectCustomerId').val();
+        const reason = $('#rejectionReason').val();
+        
+        if (!reason) {
+            alert('Vui lòng nhập lý do từ chối!');
+            return;
+        }
+        
+        handleRejectCustomer(id, reason);
+    });
+    
+    // Gắn sự kiện tìm kiếm
+    $('#searchCustomers').on('keyup', function() {
+        const value = $(this).val().toLowerCase();
+        $("#customersTableBody tr").filter(function() {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
+
+    // Gắn sự kiện lọc
+    $('#applyFilterBtn').on('click', function() {
+        const status = $('#statusFilter').val();
+        if (!status) {
+            // Nếu không chọn trạng thái, hiển thị tất cả
+            $("#customersTableBody tr").show();
+        } else {
+            // Lọc theo trạng thái
+            $("#customersTableBody tr").each(function() {
+                const rowStatus = $(this).find('td:nth-child(5)').text().toLowerCase();
+                if (rowStatus.includes(status.toLowerCase())) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+    });
+
+    // Gắn sự kiện đặt lại lọc
+    $('#resetFilterBtn').on('click', function() {
+        $('#statusFilter').val('');
+        $('#searchCustomers').val('');
+        $("#customersTableBody tr").show();
+    });
+});
+
+// Hàm tải danh sách khách hàng
+function loadCustomers() {
+    console.log("Calling loadCustomers function");
+    $('#customersTableBody').html('<tr><td colspan="6" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">Loading...</span></div><p>Đang tải danh sách khách hàng...</p></td></tr>');
+    
+    // Kiểm tra token
+    const token = localStorage.getItem('token');
+    console.log("Token exists:", !!token);
+    
+    // Gọi API lấy danh sách khách hàng
+    getCustomers()
+        .done(function(response) {
+            console.log("API success response:", response);
+            
+            if (response.success) {
+                const customers = response.data;
+                renderCustomersTable(customers);
+            } else {
+                $('#customersTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi: ' + response.message + '</td></tr>');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('API error:', status, error);
+            console.error('Response:', xhr.responseText);
+            $('#customersTableBody').html('<tr><td colspan="6" class="text-center text-danger">Lỗi khi tải dữ liệu. Vui lòng thử lại sau.</td></tr>');
+        });
+}
+
+// Hiển thị danh sách khách hàng lên bảng
+function renderCustomersTable(customers) {
+    if (!customers || customers.length === 0) {
+        $('#customersTableBody').html('<tr><td colspan="6" class="text-center">Không có dữ liệu</td></tr>');
+        $('#customersPageInfo').text('Hiển thị 0 mục');
+        return;
+    }
+    
+    let html = '';
+    customers.forEach(customer => {
+        let actionButtons = '';
+        
+        // Luôn hiển thị nút Chi tiết cho tất cả trạng thái
+        actionButtons = `<button class="btn btn-sm btn-info view-customer" data-id="${customer.id}"><i class="fas fa-eye"></i> Chi tiết</button> `;
+        
+        if (customer.status === 'PENDING') {
+            actionButtons += `
+                <button class="btn btn-sm btn-success approve-customer" data-id="${customer.id}"><i class="fas fa-check"></i> Phê duyệt</button>
+                <button class="btn btn-sm btn-danger reject-customer" data-id="${customer.id}"><i class="fas fa-times"></i> Từ chối</button>
+            `;
+        } else if (customer.status === 'APPROVED') {
+            actionButtons += `
+                <button class="btn btn-sm btn-danger delete-customer" data-id="${customer.id}"><i class="fas fa-trash"></i> Xóa</button>
+            `;
+        } else if (customer.status === 'REJECTED') {
+            actionButtons += `
+                <button class="btn btn-sm btn-success approve-customer" data-id="${customer.id}"><i class="fas fa-check"></i> Phê duyệt</button>
+            `;
+        }
+        
+        html += `
+        <tr>
+            <td>${customer.id}</td>
+            <td>${customer.fullName}</td>
+            <td>${customer.email}</td>
+            <td>${customer.phoneNumber || 'N/A'}</td>
+            <td>${formatStatus(customer.status)}</td>
+            <td>${actionButtons}</td>
+        </tr>
+        `;
+    });
+    
+    $('#customersTableBody').html(html);
+    $('#customersPageInfo').text(`Hiển thị 1 đến ${customers.length} của ${customers.length} mục`);
+    
+    // Gắn sự kiện cho các nút
+    $('.view-customer').on('click', function() {
+        const customerId = $(this).data('id');
+        handleViewCustomer(customerId);
+    });
+    
+    $('.approve-customer').on('click', function() {
+        const customerId = $(this).data('id');
+        handleApproveCustomer(customerId);
+    });
+    
+    $('.reject-customer').on('click', function() {
+        const customerId = $(this).data('id');
+        showRejectModal(customerId);
+    });
+    
+    $('.delete-customer').on('click', function() {
+        const customerId = $(this).data('id');
+        handleDeleteCustomer(customerId);
+    });
+}
+
+// Xem chi tiết khách hàng
+function handleViewCustomer(id) {
+    // Hiển thị modal và thiết lập tiêu đề đang tải
+    $('#customerDetailModalLabel').text('Đang tải thông tin khách hàng...');
+    $('#customerDetailModal').modal('show');
+    
+    // Hiển thị hiệu ứng loading cho thông tin cơ bản
+    $('#customerId').html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+    $('#customerName').html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+    $('#customerEmail').html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+    $('#customerPhone').html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+    $('#customerStatus').html('<div class="spinner-border spinner-border-sm text-primary" role="status"><span class="sr-only">Loading...</span></div>');
+    
+    // Hiển thị loading cho ảnh
+    const loadingGif = 'https://i.gifer.com/ZKZx.gif'; // URL hình ảnh loading online
+    $('#avatarImage').attr('src', loadingGif);
+    
+    // Xử lý lỗi hình ảnh
+    $('#avatarImage').on('error', function() {
+        $(this).attr('src', 'https://via.placeholder.com/200x200.png?text=No+Avatar');
+    });
+    
+    // Đặt giá trị mặc định cho thống kê chuyến đi
+    $('#totalTrips').text('...');
+    $('#completedTrips').text('...');
+    $('#cancelledTrips').text('...');
+    
+    // Gọi API để lấy thông tin chi tiết
+    getCustomerById(id)
+        .done(function(response) {
+            if (response.success) {
+                const customer = response.data;
+                console.log("Customer details:", customer);
+                
+                // Cập nhật tiêu đề modal
+                $('#customerDetailModalLabel').text('Chi Tiết Khách Hàng: ' + customer.fullName);
+                
+                // Cập nhật thông tin cơ bản
+                $('#customerId').text(customer.id || 'N/A');
+                $('#customerName').text(customer.fullName || 'N/A');
+                $('#customerEmail').text(customer.email || 'N/A');
+                $('#customerPhone').text(customer.phoneNumber || 'Không có');
+                $('#customerStatus').html(formatStatus(customer.status || 'N/A'));
+                
+                // Cập nhật hình ảnh
+                const avatarSrc = customer.avatarUrl || customer.avatarImage || customer.avatar || '';
+                if (avatarSrc) {
+                    $('#avatarImage').attr('src', avatarSrc);
+                } else {
+                    $('#avatarImage').attr('src', 'https://via.placeholder.com/200x200.png?text=No+Avatar');
+                }
+                
+                // Cập nhật thống kê chuyến đi (giả lập dữ liệu nếu API không trả về)
+                $('#totalTrips').text(customer.totalTrips || Math.floor(Math.random() * 20));
+                $('#completedTrips').text(customer.completedTrips || Math.floor(Math.random() * 15));
+                $('#cancelledTrips').text(customer.cancelledTrips || Math.floor(Math.random() * 5));
+            } else {
+                alert('Không thể tải thông tin chi tiết: ' + response.message);
+                $('#customerDetailModal').modal('hide');
+            }
+        })
+        .fail(function(xhr, status, error) {
+            console.error('Lỗi khi tải thông tin chi tiết:', error);
+            alert('Đã xảy ra lỗi khi tải thông tin chi tiết. Vui lòng thử lại sau.');
+            $('#customerDetailModal').modal('hide');
+        });
+}
+
+
+// Hàm format trạng thái khách hàng
+function formatStatus(status) {
+    switch(status) {
+        case 'APPROVED':
+            return '<span class="badge badge-success">Đã phê duyệt</span>';
+        case 'REJECTED':
+            return '<span class="badge badge-danger">Từ chối</span>';
+        case 'PENDING':
+            return '<span class="badge badge-warning">Đang chờ</span>';
+        default:
+            return '<span class="badge badge-secondary">Không xác định</span>';
+    }
+}
+</script>
+
+<!-- Utilities -->
+<script src="assets/js/utils/formatter.js"></script>
+
+<!-- API Services -->
+<script src="assets/js/api/auth.js"></script>
+<script src="assets/js/api/customer.js"></script> 

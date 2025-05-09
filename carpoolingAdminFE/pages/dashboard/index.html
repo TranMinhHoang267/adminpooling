@@ -1,0 +1,355 @@
+<div class="container-fluid">
+    <h1 class="h3 mb-4 text-gray-800">Dashboard</h1>
+    
+    <!-- Hiển thị thông báo lỗi kết nối -->
+    <div id="connectionError"></div>
+    
+    <div class="row">
+        <!-- Thống kê tài xế -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                                Tổng số tài xế</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalDrivers">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-car fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống kê khách hàng -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Tổng số khách hàng</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="totalCustomers">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-users fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Thống kê chuyến đi đang có -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Số chuyến đi đang có</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="activeTrips">0</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-route fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Button kiểm tra kết nối -->
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-secondary shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-secondary text-uppercase mb-1">
+                                Trạng thái kết nối</div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800" id="connectionStatus">
+                                <span class="badge badge-secondary">Chưa kiểm tra</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <button class="btn btn-sm btn-secondary" id="checkConnectionBtn">
+                                <i class="fas fa-sync-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chuyến đi đang có -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">Danh sách chuyến đi đang có</h6>
+                    <button class="btn btn-sm btn-primary" id="refreshRidesBtn">
+                        <i class="fas fa-sync-alt"></i> Tải lại
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="ridesTable" width="100%" cellspacing="0">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Điểm đi</th>
+                                    <th>Điểm đến</th>
+                                    <th>Thời gian khởi hành</th>
+                                    <th>Số ghế (Trống/Tổng)</th>
+                                    <th>Giá (VNĐ)</th>
+                                    <th>Tài xế</th>
+                                    <th>Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ridesList">
+                                <tr>
+                                    <td colspan="9" class="text-center">
+                                        <i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Thư viện JS -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- Utilities -->
+<script src="assets/js/utils/formatter.js"></script>
+
+<!-- API Services -->
+<script src="assets/js/api/auth.js"></script>
+<script src="assets/js/api/driver.js"></script>
+<script src="assets/js/api/customer.js"></script>
+<script src="assets/js/api/trip.js"></script>
+
+<!-- Dashboard Script -->
+<script>
+$(document).ready(function() {
+    console.log("Dashboard page loaded");
+    
+    // Tải dữ liệu mà không phụ thuộc vào kiểm tra kết nối
+    loadData();
+    
+    // Nút kiểm tra kết nối
+    $('#checkConnectionBtn').on('click', function() {
+        $('#connectionStatus').html('<span class="badge badge-warning"><i class="fas fa-spinner fa-spin"></i> Đang kiểm tra</span>');
+        
+        // Thử kết nối trực tiếp đến API login
+        $.ajax({
+            url: 'http://localhost:8080/api/auth/login',
+            type: 'POST',
+            timeout: 3000,
+            contentType: 'application/json',
+            data: JSON.stringify({
+                email: 'test@test.com',
+                password: 'test'
+            }),
+            success: function() {
+                $('#connectionStatus').html('<span class="badge badge-success">Đã kết nối</span>');
+                $('#connectionError').empty();
+                loadData();
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 401) {
+                    // Nếu server trả về 401, vẫn có nghĩa là đã kết nối được
+                    $('#connectionStatus').html('<span class="badge badge-success">Đã kết nối</span>');
+                    $('#connectionError').empty();
+                    loadData();
+                } else if (xhr.status === 0) {
+                    $('#connectionStatus').html('<span class="badge badge-danger">Không kết nối</span>');
+                    $('#connectionError').html('<div class="alert alert-danger">Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và đảm bảo rằng server đang chạy.</div>');
+                } else {
+                    $('#connectionStatus').html('<span class="badge badge-warning">Lỗi kết nối</span>');
+                    $('#connectionError').html('<div class="alert alert-warning">Server đang gặp sự cố. Vui lòng thử lại sau.</div>');
+                }
+            }
+        });
+    });
+    
+    // Nút tải lại danh sách chuyến đi
+    $('#refreshRidesBtn').on('click', function() {
+        loadAvailableRides();
+    });
+    
+    function loadData() {
+        // Hiển thị trạng thái loading
+        $('#totalDrivers').html('<i class="fas fa-spinner fa-spin"></i>');
+        $('#totalCustomers').html('<i class="fas fa-spinner fa-spin"></i>');
+        $('#activeTrips').html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Tải dữ liệu thống kê
+        loadStats();
+        
+        // Tải danh sách chuyến đi đang có
+        loadAvailableRides();
+        
+        // Kiểm tra kết nối server
+        $.ajax({
+            url: 'http://localhost:8080/api/auth/login',
+            type: 'POST',
+            timeout: 3000,
+            contentType: 'application/json',
+            data: JSON.stringify({
+                email: 'test@test.com',
+                password: 'test'
+            }),
+            success: function() {
+                $('#connectionStatus').html('<span class="badge badge-success">Đã kết nối</span>');
+                $('#connectionError').empty();
+            },
+            error: function(xhr, status, error) {
+                if (xhr.status === 401) {
+                    // Trường hợp server trả về 401 (không xác thực) vẫn là đã kết nối
+                    $('#connectionStatus').html('<span class="badge badge-success">Đã kết nối</span>');
+                    $('#connectionError').empty();
+                } else if (xhr.status === 0) {
+                    $('#connectionStatus').html('<span class="badge badge-danger">Không kết nối</span>');
+                    $('#connectionError').html('<div class="alert alert-danger">Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và đảm bảo rằng server đang chạy.</div>');
+                    showAllConnectionErrors();
+                } else {
+                    $('#connectionStatus').html('<span class="badge badge-warning">Lỗi kết nối</span>');
+                    $('#connectionError').html('<div class="alert alert-warning">Server đang gặp sự cố. Vui lòng thử lại sau.</div>');
+                }
+            }
+        });
+    }
+    
+    function loadStats() {
+        // Hiển thị trạng thái loading cho các thống kê
+        $('#totalDrivers').html('<i class="fas fa-spinner fa-spin"></i>');
+        $('#totalCustomers').html('<i class="fas fa-spinner fa-spin"></i>');
+        $('#activeTrips').html('<i class="fas fa-spinner fa-spin"></i>');
+        
+        // Lấy số lượng tài xế
+        getDrivers()
+            .then(function(response) {
+                if (response && response.success) {
+                    $('#totalDrivers').text(response.data.length || 0);
+                } else {
+                    $('#totalDrivers').text('0');
+                    console.error('Error loading drivers:', response ? response.message : 'Unknown error');
+                }
+            })
+            .catch(function(error) {
+                $('#totalDrivers').text('0');
+                console.error('Error loading drivers:', error);
+            });
+            
+        // Lấy số lượng khách hàng
+        getCustomers()
+            .then(function(response) {
+                if (response && response.success) {
+                    $('#totalCustomers').text(response.data.length || 0);
+                } else {
+                    $('#totalCustomers').text('0');
+                    console.error('Error loading customers:', response ? response.message : 'Unknown error');
+                }
+            })
+            .catch(function(error) {
+                $('#totalCustomers').text('0');
+                console.error('Error loading customers:', error);
+            });
+        
+        // Lấy số lượng chuyến đi đang có
+        getAvailableRides()
+            .then(function(response) {
+                if (response && response.success) {
+                    $('#activeTrips').text(response.data.length || 0);
+                } else {
+                    $('#activeTrips').text('0');
+                    console.error('Error loading trips:', response ? response.message : 'Unknown error');
+                }
+            })
+            .catch(function(error) {
+                $('#activeTrips').text('0');
+                console.error('Error loading trips:', error);
+            });
+    }
+    
+    function loadAvailableRides() {
+        $('#ridesList').html('<tr><td colspan="9" class="text-center"><i class="fas fa-spinner fa-spin"></i> Đang tải dữ liệu...</td></tr>');
+        
+        getAvailableRides()
+            .then(function(response) {
+                if (response && response.success && Array.isArray(response.data)) {
+                    if (response.data.length === 0) {
+                        $('#ridesList').html('<tr><td colspan="9" class="text-center">Không có chuyến đi nào</td></tr>');
+                        return;
+                    }
+                    
+                    let html = '';
+                    response.data.forEach(function(ride) {
+                        html += `<tr>
+                            <td>${ride.id}</td>
+                            <td>${ride.departure}</td>
+                            <td>${ride.destination}</td>
+                            <td>${formatDateTime(ride.startTime)}</td>
+                            <td>${ride.availableSeats} / ${ride.totalSeat}</td>
+                            <td>${formatMoney(ride.pricePerSeat)}</td>
+                            <td>${ride.driverName}</td>
+                            <td>${formatRideStatus(ride.status)}</td>
+                        </tr>`;
+                    });
+                    
+                    $('#ridesList').html(html);
+                } else {
+                    $('#ridesList').html('<tr><td colspan="9" class="text-center">Không thể tải dữ liệu chuyến đi</td></tr>');
+                    console.error('Error loading available rides:', response ? response.message : 'Unknown error');
+                }
+            })
+            .catch(function(error) {
+                $('#ridesList').html('<tr><td colspan="9" class="text-center">Lỗi khi tải dữ liệu chuyến đi</td></tr>');
+                console.error('Error loading available rides:', error);
+            });
+    }
+    
+    // Hàm format thời gian
+    function formatDateTime(dateStr) {
+        if (!dateStr) return '';
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        
+        return `${day}/${month}/${year} ${hours}:${minutes}`;
+    }
+    
+    // Hàm format tiền
+    function formatMoney(amount) {
+        if (amount === null || amount === undefined) {
+            return 'Miễn phí';
+        }
+        return new Intl.NumberFormat('vi-VN').format(amount) + ' VNĐ';
+    }
+    
+    // Hàm format trạng thái chuyến đi
+    function formatRideStatus(status) {
+        if (!status) return '';
+        
+        const statusMap = {
+            'ACTIVE': '<span class="badge badge-success">Đang hoạt động</span>',
+            'COMPLETED': '<span class="badge badge-primary">Đã hoàn thành</span>',
+            'CANCELLED': '<span class="badge badge-danger">Đã hủy</span>',
+            'PENDING': '<span class="badge badge-warning">Đang chờ</span>'
+        };
+        
+        return statusMap[status] || status;
+    }
+});
+</script>

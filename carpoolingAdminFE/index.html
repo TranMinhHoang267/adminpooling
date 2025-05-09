@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <div class="wrapper">
+        <!-- Sidebar -->
+        <nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>CarPooling Admin</h3>
+            </div>
+            <ul class="list-unstyled components">
+                <li>
+                    <a href="#" data-page="dashboard"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+                </li>
+                <li>
+                    <a href="#" data-page="drivers"><i class="fas fa-car"></i> Quản Lý Tài Xế</a>
+                </li>
+                <li>
+                    <a href="#" data-page="customers"><i class="fas fa-users"></i> Quản Lý Khách Hàng</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-chart-line"></i> Thống Kê</a>
+                </li>
+                <li>
+                    <a href="#"><i class="fas fa-cog"></i> Cài Đặt</a>
+                </li>
+            </ul>
+        </nav>
+
+        <!-- Page Content -->
+        <div id="content">
+            <!-- Header -->
+            <nav class="navbar navbar-expand-lg navbar-light bg-light">
+                <div class="container-fluid">
+                    <button type="button" id="sidebarCollapse" class="btn btn-info">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    <div class="ml-auto">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Tìm kiếm...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="navbar-nav ml-auto">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="badge badge-danger">3</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
+                                <a class="dropdown-item" href="#">Thông báo 1</a>
+                                <a class="dropdown-item" href="#">Thông báo 2</a>
+                                <a class="dropdown-item" href="#">Thông báo 3</a>
+                            </div>
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="fas fa-user-circle"></i> <span id="currentUser">Admin</span>
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="userDropdown">
+                                <a class="dropdown-item" href="#"><i class="fas fa-user"></i> Hồ sơ</a>
+                                <a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Cài đặt</a>
+                                <div class="dropdown-divider"></div>
+                                <a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </nav>
+
+            <!-- Main Content -->
+            <div id="main-content" class="container-fluid">
+                <!-- Dashboard Content -->
+                <div class="dashboard-content">
+                    <!-- Tài xế Status Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tài xế chờ duyệt</h5>
+                                    <h2 class="card-text" id="pendingDrivers">0</h2>
+                                    <p class="card-text">Tài xế đang chờ xét duyệt</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tài xế đã duyệt</h5>
+                                    <h2 class="card-text" id="approvedDrivers">0</h2>
+                                    <p class="card-text">Tài xế đã được phê duyệt</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tài xế bị từ chối</h5>
+                                    <h2 class="card-text" id="rejectedDrivers">0</h2>
+                                    <p class="card-text">Tài xế bị từ chối</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng số tài xế</h5>
+                                    <h2 class="card-text" id="totalDrivers">0</h2>
+                                    <p class="card-text">Tổng số tài xế trong hệ thống</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chuyến đi Status Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Chuyến đi đang diễn ra</h5>
+                                    <h2 class="card-text" id="activeTrips">0</h2>
+                                    <p class="card-text">Chuyến đi đang được thực hiện</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Chuyến đi hoàn thành</h5>
+                                    <h2 class="card-text" id="completedTrips">0</h2>
+                                    <p class="card-text">Chuyến đi đã kết thúc</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-danger text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Chuyến đi bị hủy</h5>
+                                    <h2 class="card-text" id="cancelledTrips">0</h2>
+                                    <p class="card-text">Chuyến đi đã bị hủy</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body">
+                                    <h5 class="card-title">Tổng số chuyến đi</h5>
+                                    <h2 class="card-text" id="totalTrips">0</h2>
+                                    <p class="card-text">Tổng số chuyến đi trong hệ thống</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách tài xế chờ duyệt -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Danh sách tài xế chờ duyệt</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="pendingDriversTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Họ tên</th>
+                                                    <th>Email</th>
+                                                    <th>Số điện thoại</th>
+                                                    <th>Ngày đăng ký</th>
+                                                    <th>Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dữ liệu sẽ được thêm vào đây -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Danh sách chuyến đi gần đây -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Chuyến đi gần đây</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover" id="recentTripsTable">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Tài xế</th>
+                                                    <th>Điểm đi</th>
+                                                    <th>Điểm đến</th>
+                                                    <th>Thời gian</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Thao tác</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Dữ liệu sẽ được thêm vào đây -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Server Status Alert -->
+            <div id="serverStatus" class="fixed-bottom m-3" style="display:none; z-index:9999;"></div>
+            
+            <!-- Logout Modal -->
+            <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="logoutModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="logoutModalLabel">Xác nhận đăng xuất</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            Bạn có chắc chắn muốn đăng xuất khỏi hệ thống?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-primary" id="confirmLogout">
+                                <span id="logoutBtnText">Đăng xuất</span>
+                                <span id="logoutBtnSpinner" class="spinner-border spinner-border-sm ml-2" role="status" style="display: none;"></span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery và Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <!-- API Services -->
+    <script src="assets/js/utils/config.js"></script>
+    <script src="assets/js/api/auth.js"></script>
+    <script src="assets/js/api/driver.js"></script>
+    <script src="assets/js/api/customer.js"></script>
+    <script src="assets/js/api/trip.js"></script>
+    
+    <!-- Utilities -->
+    <script src="assets/js/utils/formatter.js"></script>
+    
+    <!-- Application -->
+    <script src="assets/js/router.js"></script>
+    <script src="assets/js/main.js"></script>
+    
+    <script>
+        console.log("Main index.html loaded");
+        $(document).ready(function() {
+            console.log("Document ready in index.html");
+            
+            // Khởi tạo các dropdown của Bootstrap
+            $('.dropdown-toggle').dropdown();
+            
+            // Hàm lấy và hiển thị thống kê tài xế
+            function loadDriverStats() {
+                console.log('Loading driver stats...');
+                getDrivers()
+                    .then(function(response) {
+                        console.log('Driver stats response:', response);
+                        if (response && response.success && Array.isArray(response.data)) {
+                            const drivers = response.data;
+                            const stats = {
+                                pending: drivers.filter(d => d.status === 'PENDING').length,
+                                approved: drivers.filter(d => d.status === 'APPROVED').length,
+                                rejected: drivers.filter(d => d.status === 'REJECTED').length,
+                                total: drivers.length
+                            };
+                            
+                            $('#pendingDrivers').text(stats.pending);
+                            $('#approvedDrivers').text(stats.approved);
+                            $('#rejectedDrivers').text(stats.rejected);
+                            $('#totalDrivers').text(stats.total);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error loading driver stats:', error);
+                        showError('Không thể tải thống kê tài xế');
+                    });
+            }
+
+            // Hàm lấy và hiển thị thống kê chuyến đi
+            function loadTripStats() {
+                console.log('Loading trip stats...');
+                getAvailableRides()
+                    .then(function(response) {
+                        console.log('Trip stats response:', response);
+                        if (response && response.success && Array.isArray(response.data)) {
+                            const trips = response.data;
+                            const stats = {
+                                active: trips.filter(t => t.status === 'ACTIVE').length,
+                                completed: trips.filter(t => t.status === 'COMPLETED').length,
+                                cancelled: trips.filter(t => t.status === 'CANCELLED').length,
+                                total: trips.length
+                            };
+                            
+                            $('#activeTrips').text(stats.active);
+                            $('#completedTrips').text(stats.completed);
+                            $('#cancelledTrips').text(stats.cancelled);
+                            $('#totalTrips').text(stats.total);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error loading trip stats:', error);
+                        showError('Không thể tải thống kê chuyến đi');
+                    });
+            }
+
+            // Hàm lấy và hiển thị danh sách tài xế chờ duyệt
+            function loadPendingDrivers() {
+                console.log('Loading pending drivers...');
+                getPendingDrivers()
+                    .then(function(response) {
+                        console.log('Pending drivers response:', response);
+                        const tbody = $('#pendingDriversTable tbody');
+                        tbody.empty();
+                        
+                        if (response && response.length > 0) {
+                            response.forEach(driver => {
+                                tbody.append(`
+                                    <tr>
+                                        <td>${driver.id}</td>
+                                        <td>${driver.fullName}</td>
+                                        <td>${driver.email}</td>
+                                        <td>${driver.phone}</td>
+                                        <td>${formatDate(driver.createdAt)}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-success" onclick="approveDriver(${driver.id})">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-danger" onclick="rejectDriver(${driver.id})">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                            <button class="btn btn-sm btn-info" onclick="viewDriverDetails(${driver.id})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            tbody.append(`
+                                <tr>
+                                    <td colspan="6" class="text-center">Không có tài xế nào đang chờ duyệt</td>
+                                </tr>
+                            `);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error loading pending drivers:', error);
+                        showError('Không thể tải danh sách tài xế chờ duyệt');
+                    });
+            }
+
+            // Hàm lấy và hiển thị danh sách chuyến đi gần đây
+            function loadRecentTrips() {
+                console.log('Loading recent trips...');
+                getAvailableRides()
+                    .then(function(response) {
+                        console.log('Recent trips response:', response);
+                        const tbody = $('#recentTripsTable tbody');
+                        tbody.empty();
+
+                        if (response && response.success && Array.isArray(response.data) && response.data.length > 0) {
+                            response.data.forEach(trip => {
+                                tbody.append(`
+                                    <tr>
+                                        <td>${trip.id}</td>
+                                        <td>${trip.driverName}</td>
+                                        <td>${trip.departure}</td>
+                                        <td>${trip.destination}</td>
+                                        <td>${formatDateTime(trip.startTime)}</td>
+                                        <td>
+                                            <span class="badge badge-${getStatusBadgeClass(trip.status)}">
+                                                ${getStatusText(trip.status)}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <button class="btn btn-sm btn-info" onclick="viewTripDetails(${trip.id})">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `);
+                            });
+                        } else {
+                            tbody.append(`
+                                <tr>
+                                    <td colspan="7" class="text-center">Không có chuyến đi nào gần đây</td>
+                                </tr>
+                            `);
+                        }
+                    })
+                    .catch(function(error) {
+                        console.error('Error loading recent trips:', error);
+                        showError('Không thể tải danh sách chuyến đi gần đây');
+                    });
+            }
+
+            // Hàm phê duyệt tài xế
+            window.approveDriver = function(driverId) {
+                if (confirm('Bạn có chắc chắn muốn phê duyệt tài xế này?')) {
+                    approveDriver(driverId)
+                        .then(function() {
+                            showSuccess('Đã phê duyệt tài xế thành công');
+                            loadDriverStats();
+                            loadPendingDrivers();
+                        })
+                        .catch(function(error) {
+                            console.error('Error approving driver:', error);
+                            showError('Không thể phê duyệt tài xế');
+                        });
+                }
+            };
+
+            // Hàm từ chối tài xế
+            window.rejectDriver = function(driverId) {
+                const reason = prompt('Vui lòng nhập lý do từ chối:');
+                if (reason) {
+                    rejectDriver(driverId, reason)
+                        .then(function() {
+                            showSuccess('Đã từ chối tài xế thành công');
+                            loadDriverStats();
+                            loadPendingDrivers();
+                        })
+                        .catch(function(error) {
+                            console.error('Error rejecting driver:', error);
+                            showError('Không thể từ chối tài xế');
+                        });
+                }
+            };
+
+            // Hàm xem chi tiết tài xế
+            window.viewDriverDetails = function(driverId) {
+                // TODO: Implement driver details view
+                alert('Xem chi tiết tài xế: ' + driverId);
+            };
+
+            // Hàm xem chi tiết chuyến đi
+            window.viewTripDetails = function(tripId) {
+                // TODO: Implement trip details view
+                alert('Xem chi tiết chuyến đi: ' + tripId);
+            };
+
+            // Hàm hiển thị thông báo lỗi
+            function showError(message) {
+                $('#serverStatus').html(`
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i> ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `).show();
+            }
+
+            // Hàm hiển thị thông báo thành công
+            function showSuccess(message) {
+                $('#serverStatus').html(`
+                    <div class="alert alert-success alert-dismissible fade show" role="alert">
+                        <i class="fas fa-check-circle mr-2"></i> ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                `).show();
+            }
+
+            // Hàm format ngày tháng
+            function formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('vi-VN');
+            }
+
+            // Hàm format ngày giờ
+            function formatDateTime(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString('vi-VN');
+            }
+
+            // Hàm lấy class cho badge trạng thái
+            function getStatusBadgeClass(status) {
+                switch (status) {
+                    case 'ACTIVE': return 'primary';
+                    case 'COMPLETED': return 'success';
+                    case 'CANCELLED': return 'danger';
+                    default: return 'secondary';
+                }
+            }
+
+            // Hàm lấy text trạng thái
+            function getStatusText(status) {
+                switch (status) {
+                    case 'ACTIVE': return 'Đang diễn ra';
+                    case 'COMPLETED': return 'Hoàn thành';
+                    case 'CANCELLED': return 'Đã hủy';
+                    default: return 'Không xác định';
+                }
+            }
+
+            // Load dữ liệu khi trang được tải
+            if (checkTokenValidity()) {
+                console.log('Token is valid, loading data...');
+                // Hiển thị thông tin người dùng
+                const email = localStorage.getItem('email');
+                const name = localStorage.getItem('name') || email;
+                $('#currentUser').text(name);
+                
+                // Load dữ liệu
+                loadDriverStats();
+                loadTripStats();
+                loadPendingDrivers();
+                loadRecentTrips();
+                
+                // Refresh dữ liệu mỗi 30 giây
+                setInterval(function() {
+                    console.log('Refreshing data...');
+                    loadDriverStats();
+                    loadTripStats();
+                    loadPendingDrivers();
+                    loadRecentTrips();
+                }, 30000);
+            } else {
+                console.log('Token is invalid, redirecting to login...');
+                window.location.href = 'login.html';
+            }
+            
+            // Kiểm tra kết nối server
+            function checkServerStatus() {
+                checkServerConnection(
+                    // Success callback
+                    function(response) {
+                        console.log("Server connection OK");
+                        $('#serverStatus').hide();
+                    },
+                    // Error callback
+                    function(errorInfo) {
+                        console.error("Server connection issue:", errorInfo);
+                        
+                        if (errorInfo.isTimeout) {
+                            showServerStatus('warning', 'Server không phản hồi. Một số chức năng có thể không hoạt động.');
+                        } else if (errorInfo.isConnectionError) {
+                            showServerStatus('danger', 'Mất kết nối server. Vui lòng kiểm tra kết nối mạng của bạn.');
+                        } else {
+                            showServerStatus('danger', 'Lỗi kết nối đến server. Dữ liệu có thể không được cập nhật.');
+                        }
+                        
+                        // Thử kết nối lại sau 30 giây
+                        setTimeout(checkServerStatus, CONFIG.CONNECTION.RETRY_INTERVAL);
+                    }
+                );
+            }
+            
+            function showServerStatus(type, message) {
+                $('#serverStatus').html(`
+                    <div class="alert alert-${type} alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-circle mr-2"></i> ${message}
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-${type} ml-2" id="retryServerConnection">
+                            <i class="fas fa-sync-alt mr-1"></i> Thử lại
+                        </button>
+                    </div>
+                `).show();
+            }
+            
+            // Kiểm tra token chi tiết
+            function checkTokenValidity() {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    console.log('No token found, redirecting to login');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                
+                console.log('Token found in localStorage:', token.substring(0, 15) + '...');
+                
+                try {
+                    const tokenParts = token.split('.');
+                    if (tokenParts.length === 3) {
+                        const payload = JSON.parse(atob(tokenParts[1]));
+                        console.log('Token payload:', payload);
+                        
+                        const expiryTime = payload.exp ? payload.exp * 1000 : null;
+                        if (!expiryTime) {
+                            console.log('Token does not have expiration time, assuming valid');
+                            return true;
+                        }
+                        
+                        const currentTime = new Date().getTime();
+                        console.log('Current time:', new Date(), '- Expiry time:', new Date(expiryTime));
+                        
+                        // Kiểm tra token còn hiệu lực
+                        if (expiryTime <= currentTime) {
+                            console.log('Token expired, redirecting to login');
+                            showTokenExpirationAlert();
+                            return false;
+                        }
+                        
+                        // Kiểm tra token sắp hết hạn (còn < 5 phút)
+                        const fiveMinutes = 5 * 60 * 1000;
+                        if (expiryTime - currentTime < fiveMinutes) {
+                            console.log('Token will expire soon, showing warning');
+                            showTokenWarning(Math.floor((expiryTime - currentTime) / 60000));
+                        }
+                        
+                        return true;
+                    } else {
+                        console.log('Invalid token format, should have 3 parts but has ' + tokenParts.length);
+                        localStorage.clear();
+                        window.location.href = 'login.html';
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error checking token:', error);
+                    localStorage.clear();
+                    window.location.href = 'login.html';
+                    return false;
+                }
+            }
+            
+            function showTokenExpirationAlert() {
+                localStorage.clear();
+                
+                $('#serverStatus').html(`
+                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-clock mr-2"></i> Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <a href="login.html" class="btn btn-sm btn-warning ml-2">
+                            <i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập lại
+                        </a>
+                    </div>
+                `).show();
+                
+                // Chuyển hướng sau 3 giây
+                setTimeout(function() {
+                    window.location.href = 'login.html';
+                }, 3000);
+            }
+            
+            function showTokenWarning(minutes) {
+                $('#serverStatus').html(`
+                    <div class="alert alert-info alert-dismissible fade show" role="alert">
+                        <i class="fas fa-clock mr-2"></i> Phiên đăng nhập sẽ hết hạn trong ${minutes} phút.
+                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <button type="button" class="btn btn-sm btn-info ml-2" id="refreshToken">
+                            <i class="fas fa-sync-alt mr-1"></i> Gia hạn phiên
+                        </button>
+                    </div>
+                `).show();
+            }
+            
+            // Xử lý sự kiện thử lại kết nối server
+            $(document).on('click', '#retryServerConnection', function() {
+                $('#serverStatus').html(`
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-sync-alt fa-spin mr-2"></i> Đang thử kết nối lại...
+                    </div>
+                `);
+                
+                setTimeout(checkServerStatus, 1000);
+            });
+            
+            // Xử lý sự kiện gia hạn token
+            $(document).on('click', '#refreshToken', function() {
+                $('#serverStatus').html(`
+                    <div class="alert alert-info" role="alert">
+                        <i class="fas fa-sync-alt fa-spin mr-2"></i> Đang gia hạn phiên đăng nhập...
+                    </div>
+                `);
+                
+                // Gọi API refresh token nếu có
+                if (typeof refreshToken === 'function') {
+                    refreshToken()
+                        .then(function() {
+                            $('#serverStatus').html(`
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-check-circle mr-2"></i> Gia hạn phiên thành công.
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            `);
+                            
+                            // Ẩn thông báo sau 3 giây
+                            setTimeout(function() {
+                                $('#serverStatus').hide();
+                            }, 3000);
+                        })
+                        .catch(function(error) {
+                            console.error('Token refresh failed:', error);
+                            $('#serverStatus').html(`
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    <i class="fas fa-exclamation-circle mr-2"></i> Không thể gia hạn phiên. Vui lòng đăng nhập lại.
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                    <a href="login.html" class="btn btn-sm btn-danger ml-2">
+                                        <i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập lại
+                                    </a>
+                                </div>
+                            `);
+                        });
+                } else {
+                    // Nếu không có hàm refresh token, đăng xuất
+                    $('#serverStatus').html(`
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle mr-2"></i> Không thể gia hạn phiên. Vui lòng đăng nhập lại.
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                            <a href="login.html" class="btn btn-sm btn-warning ml-2">
+                                <i class="fas fa-sign-in-alt mr-1"></i> Đăng nhập lại
+                            </a>
+                        </div>
+                    `);
+                }
+            });
+            
+            // Xử lý sự kiện logout
+            $('#logoutBtn').on('click', function(e) {
+                e.preventDefault();
+                $('#logoutModal').modal('show');
+            });
+            
+            // Xử lý xác nhận đăng xuất
+            $('#confirmLogout').on('click', function() {
+                // Hiển thị loading
+                $('#logoutBtnText').text('Đang xử lý...');
+                $('#logoutBtnSpinner').show();
+                
+                // Giả lập quá trình đăng xuất nhanh
+                setTimeout(function() {
+                    console.log('Logging out...');
+                    // Xóa toàn bộ dữ liệu trong localStorage
+                    localStorage.clear();
+                    // Chuyển hướng về trang đăng nhập
+                    window.location.href = 'login.html';
+                }, 500);
+            });
+        });
+    </script>
+</body>
+</html>
